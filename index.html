@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel-Finder - Find the Best Fuel Prices in Italy</title>
+
+    <!-- MapLibre GL CSS -->
+    <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Loading fuel data...</p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header id="header">
+            <button id="toggle-header" class="toggle-header-btn" aria-label="Toggle header">
+                <span class="toggle-icon">▲</span>
+            </button>
+            <div class="header-content">
+                <h1 class="app-title">⛽ Fuel-Finder</h1>
+                <p class="app-subtitle">Find the best fuel prices in Italy</p>
+
+                <!-- Fuel Filter Chips -->
+                <div id="fuel-filters" class="fuel-filters">
+                    <!-- Dynamically populated by JavaScript -->
+                </div>
+
+                <!-- Search Radius Slider -->
+                <div class="slider-container">
+                    <label for="radius-slider">
+                        Search Radius: <span id="radius-value">10</span> km
+                    </label>
+                    <input type="range" id="radius-slider" min="1" max="50" value="10" step="1">
+                </div>
+
+                <p class="instruction-text">Click on the map to search for nearby stations</p>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Map Container -->
+            <div id="map"></div>
+
+            <!-- Results Panel -->
+            <div id="results-panel" class="results-panel">
+                <div class="results-header">
+                    <h2>Nearby Stations</h2>
+                    <button id="close-results" class="close-btn">&times;</button>
+                </div>
+                <div id="results-list" class="results-list">
+                    <!-- Dynamically populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Price Distribution Panel -->
+            <div id="price-distribution-panel" class="price-distribution-panel hidden">
+                <div class="distribution-header">
+                    <h3>📊 Price Distribution</h3>
+                    <button id="close-distribution" class="close-btn-small">&times;</button>
+                </div>
+                <div id="distribution-content" class="distribution-content">
+                    <canvas id="price-histogram" width="300" height="200"></canvas>
+                    <div id="distribution-stats" class="distribution-stats">
+                        <!-- Stats will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+
+    <!-- Turf.js -->
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="app.js"></script>
+</body>
+
+</html>
