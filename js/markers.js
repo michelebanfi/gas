@@ -13,6 +13,8 @@ export class MarkerManager {
         this.clusterIndex = null;
         this.searchCenter = null;
         this.searchRadius = null;
+        this.htmlMarkers = new Map(); // Store HTML marker instances by index
+        this.updateTimeout = null;
     }
 
     /**
@@ -105,11 +107,11 @@ export class MarkerManager {
                 'circle-color': [
                     'step',
                     ['get', 'point_count'],
-                    '#51bbd6', // Blue for small clusters
+                    '#33333349', // Blue for small clusters
                     10,
-                    '#f1f075', // Yellow for medium clusters
+                    '#3333339a', // Yellow for medium clusters
                     30,
-                    '#f28cb1'  // Pink for large clusters
+                    '#333'  // Pink for large clusters
                 ],
                 'circle-radius': [
                     'step',
@@ -141,44 +143,8 @@ export class MarkerManager {
             }
         });
         
-        // Add unclustered markers layer with color based on freshness
-        this.map.addLayer({
-            id: 'fuel-markers',
-            type: 'circle',
-            source: 'fuel-stations',
-            filter: ['!', ['has', 'point_count']],
-            paint: {
-                'circle-radius': 10,
-                'circle-color': ['get', 'color'],
-                'circle-stroke-width': 3,
-                'circle-stroke-color': '#FFFFFF',
-                'circle-opacity': ['case',
-                    ['has', 'insideSearch'],
-                    ['get', 'insideSearch'],
-                    0.9
-                ]
-            }
-        });
-        
-        // Add labels layer for unclustered markers
-        this.map.addLayer({
-            id: 'fuel-labels',
-            type: 'symbol',
-            source: 'fuel-stations',
-            filter: ['!', ['has', 'point_count']],
-            layout: {
-                'text-field': '€{price}',
-                'text-font': ['Noto Sans Regular'],
-                'text-offset': [0, 1.8],
-                'text-anchor': 'top',
-                'text-size': 12
-            },
-            paint: {
-                'text-color': '#2A2A2A',
-                'text-halo-color': '#FFFFFF',
-                'text-halo-width': 2
-            }
-        });
+        // Create initial HTML markers
+        this._updateHTMLMarkers();
         
         // Add click handler for clusters (expand on click)
         this.map.on('click', 'fuel-clusters', (e) => {
@@ -193,46 +159,100 @@ export class MarkerManager {
             });
         });
         
-        // Add click handler for individual markers (only if not already added)
-        if (!this._clickHandlerAdded) {
-            this.map.on('click', 'fuel-markers', (e) => {
-                const coordinates = e.features[0].geometry.coordinates.slice();
-                const index = e.features[0].properties.index;
-                const markerData = this.markersData[index];
-                
-                // Create popup
-                new maplibregl.Popup()
-                    .setLngLat(coordinates)
-                    .setHTML(createPopupContent(markerData.feature))
-                    .addTo(this.map);
-            });
-            
-            // Change cursor on hover for clusters
-            this.map.on('mouseenter', 'fuel-clusters', () => {
-                this.map.getCanvas().style.cursor = 'pointer';
-            });
-            
-            this.map.on('mouseleave', 'fuel-clusters', () => {
-                this.map.getCanvas().style.cursor = '';
-            });
-            
-            // Change cursor on hover for markers
-            this.map.on('mouseenter', 'fuel-markers', () => {
-                this.map.getCanvas().style.cursor = 'pointer';
-            });
-            
-            this.map.on('mouseleave', 'fuel-markers', () => {
-                this.map.getCanvas().style.cursor = '';
-            });
-            
-            this._clickHandlerAdded = true;
-        }
+        // Update markers on map move/zoom with debouncing
+        const debouncedUpdate = () => {
+            if (this.updateTimeout) {
+                clearTimeout(this.updateTimeout);
+            }
+            this.updateTimeout = setTimeout(() => this._updateClusters(), 50);
+        };
         
-        // Update clusters on zoom/move
-        this.map.on('moveend', () => this._updateClusters());
+        this.map.on('moveend', debouncedUpdate);
         this.map.on('zoomend', () => this._updateClusters());
         
         console.log(`Rendered ${features.length} markers with clustering`);
+    }
+
+    /**
+     * Update HTML markers - only create/update markers that should be visible
+     */
+    _updateHTMLMarkers() {
+        if (!this.clusterIndex) return;
+        
+        const clusters = this._getClusters();
+        const visibleIndices = new Set();
+        
+        // Collect indices of visible individual points
+        clusters.features.forEach(feature => {
+            if (!feature.properties.cluster) {
+                visibleIndices.add(feature.properties.index);
+            }
+        });
+        
+        // Remove markers that should no longer be visible
+        const markersToRemove = [];
+        this.htmlMarkers.forEach((markerObj, index) => {
+            if (!visibleIndices.has(index)) {
+                markerObj.marker.remove();
+                markersToRemove.push(index);
+            }
+        });
+        markersToRemove.forEach(index => this.htmlMarkers.delete(index));
+        
+        // Create or update markers that should be visible
+        visibleIndices.forEach(index => {
+            const markerData = this.markersData[index];
+            
+            if (!this.htmlMarkers.has(index)) {
+                // Create new marker
+                const el = document.createElement('div');
+                el.className = 'price-chip-marker';
+                el.style.borderColor = markerData.color;
+                el.innerHTML = `€${markerData.price.toFixed(3)}`;
+                
+                // Add click handler
+                el.addEventListener('click', () => {
+                    new maplibregl.Popup()
+                        .setLngLat(markerData.coordinates)
+                        .setHTML(createPopupContent(markerData.feature))
+                        .addTo(this.map);
+                });
+                
+                // Create and store marker
+                const marker = new maplibregl.Marker({
+                    element: el,
+                    anchor: 'center'
+                })
+                    .setLngLat(markerData.coordinates)
+                    .addTo(this.map);
+                
+                this.htmlMarkers.set(index, {
+                    marker: marker,
+                    element: el,
+                    data: markerData
+                });
+            }
+            
+            // Update opacity based on search area
+            const markerObj = this.htmlMarkers.get(index);
+            if (this.searchCenter && this.searchRadius) {
+                const stationPoint = turf.point(markerData.coordinates);
+                const distance = turf.distance(this.searchCenter, stationPoint, { units: 'kilometers' });
+                markerObj.element.style.opacity = distance <= this.searchRadius ? '1' : '0.3';
+            } else {
+                markerObj.element.style.opacity = '1';
+            }
+        });
+    }
+
+    /**
+     * Clear all HTML markers
+     */
+    _clearHTMLMarkers() {
+        this.htmlMarkers.forEach(({ marker }) => {
+            marker.remove();
+        });
+        this.htmlMarkers.clear();
     }
 
     /**
@@ -297,24 +317,30 @@ export class MarkerManager {
         
         const source = this.map.getSource('fuel-stations');
         source.setData(this._getClusters());
+        
+        // Update HTML markers to match clustering state
+        this._updateHTMLMarkers();
     }
 
     /**
      * Clear all markers from the map
      */
     clearMarkers() {
-        if (this.map.getLayer('fuel-labels')) {
-            this.map.removeLayer('fuel-labels');
-        }
-        if (this.map.getLayer('fuel-markers')) {
-            this.map.removeLayer('fuel-markers');
-        }
-        if (this.map.getLayer('fuel-cluster-count')) {
-            this.map.removeLayer('fuel-cluster-count');
-        }
-        if (this.map.getLayer('fuel-clusters')) {
-            this.map.removeLayer('fuel-clusters');
-        }
+        // Clear HTML markers first
+        this._clearHTMLMarkers();
+        
+        // Remove cluster layers
+        const layers = [
+            'fuel-cluster-count',
+            'fuel-clusters'
+        ];
+        
+        layers.forEach(layerId => {
+            if (this.map.getLayer(layerId)) {
+                this.map.removeLayer(layerId);
+            }
+        });
+        
         if (this.map.getSource('fuel-stations')) {
             this.map.removeSource('fuel-stations');
         }
@@ -335,24 +361,6 @@ export class MarkerManager {
         
         // Update clusters with new search area
         this._updateClusters();
-        
-        const source = this.map.getSource('fuel-stations');
-        const data = source._data;
-        
-        // Update each feature's opacity based on whether it's inside the search circle
-        data.features.forEach(feature => {
-            // Skip cluster features
-            if (feature.properties.cluster) return;
-            
-            const stationPoint = turf.point(feature.geometry.coordinates);
-            const distance = turf.distance(centerPoint, stationPoint, { units: 'kilometers' });
-            
-            // Set opacity: 0.9 inside circle, 0.25 outside
-            feature.properties.insideSearch = distance <= radiusKm ? 0.9 : 0.25;
-        });
-        
-        // Update the source with modified data
-        source.setData(data);
     }
 
     /**
@@ -367,17 +375,5 @@ export class MarkerManager {
         
         // Update clusters to restore normal clustering
         this._updateClusters();
-        
-        const source = this.map.getSource('fuel-stations');
-        const data = source._data;
-        
-        data.features.forEach(feature => {
-            // Skip cluster features
-            if (feature.properties.cluster) return;
-            
-            feature.properties.insideSearch = 0.9;
-        });
-        
-        source.setData(data);
     }
 }
