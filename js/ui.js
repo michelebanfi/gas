@@ -12,9 +12,11 @@ export class UIManager {
         this.header = document.getElementById('header');
         this.toggleHeaderBtn = document.getElementById('toggle-header');
         this.resultsPanel = document.getElementById('results-panel');
+        this.resultsHeader = document.getElementById('results-header');
         this.closeResultsBtn = document.getElementById('close-results');
         this.priceDistributionPanel = document.getElementById('price-distribution-panel');
         this.closeDistributionBtn = document.getElementById('close-distribution');
+        this.resultsPanelState = 'medium'; // 'minimized', 'medium', 'expanded'
     }
 
     /**
@@ -90,6 +92,23 @@ export class UIManager {
         // Toggle header collapse
         this.toggleHeaderBtn.addEventListener('click', () => {
             this.header.classList.toggle('collapsed');
+            
+            // Update icon based on state
+            const icon = this.toggleHeaderBtn.querySelector('.toggle-icon');
+            if (this.header.classList.contains('collapsed')) {
+                icon.textContent = '🔍';
+            } else {
+                icon.textContent = '▼';
+            }
+        });
+        
+        // Toggle results panel state (three states)
+        this.resultsHeader.addEventListener('click', (e) => {
+            // Don't toggle if clicking the close button
+            if (e.target.id === 'close-results' || e.target.closest('#close-results')) {
+                return;
+            }
+            this.toggleResultsPanelState();
         });
         
         // Close distribution button
@@ -100,10 +119,38 @@ export class UIManager {
         });
         
         // Close results button
-        this.closeResultsBtn.addEventListener('click', () => {
+        this.closeResultsBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent header click event
             if (callbacks.onCloseResults) {
                 callbacks.onCloseResults();
             }
         });
+    }
+    
+    /**
+     * Toggle results panel between three states: minimized -> medium -> expanded -> minimized
+     */
+    toggleResultsPanelState() {
+        this.resultsPanel.classList.remove('minimized', 'expanded');
+        
+        if (this.resultsPanelState === 'medium') {
+            this.resultsPanelState = 'expanded';
+            this.resultsPanel.classList.add('expanded');
+        } else if (this.resultsPanelState === 'expanded') {
+            this.resultsPanelState = 'minimized';
+            this.resultsPanel.classList.add('minimized');
+        } else {
+            this.resultsPanelState = 'medium';
+        }
+        
+        console.log('Results panel state:', this.resultsPanelState);
+    }
+    
+    /**
+     * Reset results panel to medium state
+     */
+    resetResultsPanelState() {
+        this.resultsPanelState = 'medium';
+        this.resultsPanel.classList.remove('minimized', 'expanded');
     }
 }

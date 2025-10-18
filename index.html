@@ -30,15 +30,14 @@
 
     <!-- Main Container -->
     <div class="container">
+        <!-- Toggle Button for Header (outside header so it stays visible) -->
+        <button id="toggle-header" class="toggle-header-btn" aria-label="Toggle header">
+            <span class="toggle-icon">▼</span>
+        </button>
+
         <!-- Header -->
         <header id="header">
-            <button id="toggle-header" class="toggle-header-btn" aria-label="Toggle header">
-                <span class="toggle-icon">▲</span>
-            </button>
             <div class="header-content">
-                <h1 class="app-title">Fuel-Finder</h1>
-                <p class="app-subtitle">Find the best fuel prices in Italy</p>
-
                 <!-- Fuel Filter Chips -->
                 <div id="fuel-filters" class="fuel-filters">
                     <!-- Dynamically populated by JavaScript -->
@@ -63,8 +62,11 @@
 
             <!-- Results Panel -->
             <div id="results-panel" class="results-panel">
-                <div class="results-header">
-                    <h2>Nearby Stations</h2>
+                <div id="results-header" class="results-header">
+                    <h2>
+                        Nearby Stations
+                        <span class="expand-indicator">▼</span>
+                    </h2>
                     <button id="close-results" class="close-btn">&times;</button>
                 </div>
                 <div id="results-list" class="results-list">

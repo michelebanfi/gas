@@ -107,11 +107,11 @@ export class MarkerManager {
                 'circle-color': [
                     'step',
                     ['get', 'point_count'],
-                    '#33333349', // Blue for small clusters
+                    'rgba(51, 51, 51, 0.7)', // Grey for small clusters
                     10,
-                    '#3333339a', // Yellow for medium clusters
+                    'rgba(51, 51, 51, 0.85)', // Darker grey for medium clusters
                     30,
-                    '#333'  // Pink for large clusters
+                    '#333'  // Full grey for large clusters
                 ],
                 'circle-radius': [
                     'step',

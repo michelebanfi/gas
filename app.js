@@ -45,7 +45,7 @@ class FuelFinderApp {
             
             // Initialize marker and search managers (need map instance)
             this.markerManager = new MarkerManager(map);
-            this.searchManager = new SearchManager(map, this.chartManager);
+            this.searchManager = new SearchManager(map, this.chartManager, this.uiManager);
             
             // Create fuel filter chips
             this.uiManager.createFuelFilters(

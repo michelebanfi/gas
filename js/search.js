@@ -6,9 +6,10 @@
 import { createPopupContent } from './utils.js';
 
 export class SearchManager {
-    constructor(map, chartManager) {
+    constructor(map, chartManager, uiManager) {
         this.map = map;
         this.chartManager = chartManager;
+        this.uiManager = uiManager;
         this.resultsPanel = document.getElementById('results-panel');
         this.resultsList = document.getElementById('results-list');
     }
@@ -86,8 +87,11 @@ export class SearchManager {
             this.chartManager.showPriceDistribution(stations);
         }
         
-        // Show results panel
+        // Show results panel and reset to medium state
         this.resultsPanel.classList.remove('hidden');
+        if (this.uiManager && this.uiManager.resetResultsPanelState) {
+            this.uiManager.resetResultsPanelState();
+        }
     }
 
     /**
