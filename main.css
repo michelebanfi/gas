@@ -825,7 +825,7 @@ header.collapsed .toggle-icon::before {
    =========================== */
 .price-distribution-panel {
     position: absolute;
-    bottom: 20px;
+    bottom: 70px;
     left: 20px;
     width: 350px;
     max-height: 400px;
@@ -841,7 +841,7 @@ header.collapsed .toggle-icon::before {
 }
 
 .price-distribution-panel.hidden {
-    transform: translateY(calc(100% + 20px));
+    transform: translateY(calc(100% + 70px));
     opacity: 0;
     pointer-events: none;
 }
@@ -929,10 +929,15 @@ header.collapsed .toggle-icon::before {
 /* Mobile adjustments */
 @media (max-width: 768px) {
     .price-distribution-panel {
+        bottom: 60px;
         left: 10px;
         right: 10px;
         width: auto;
         max-height: 300px;
+    }
+    
+    .price-distribution-panel.hidden {
+        transform: translateY(calc(100% + 60px));
     }
 }
 
@@ -955,4 +960,59 @@ header.collapsed .toggle-icon::before {
     font-size: 0.95rem;
     line-height: 1.6;
     font-weight: 400;
+}
+
+/* ===========================
+   DATA CITATION
+   =========================== */
+.data-citation {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 10px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px var(--shadow-strong);
+    border: 1px solid var(--border-subtle);
+    z-index: 750;
+    transition: all 0.3s ease;
+}
+
+.data-citation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-strong);
+}
+
+.citation-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.citation-text a {
+    color: var(--accent-teal-light);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.citation-text a:hover {
+    color: var(--accent-teal);
+    text-decoration: underline;
+}
+
+/* Mobile adjustments for data citation */
+@media (max-width: 768px) {
+    .data-citation {
+        bottom: 10px;
+        left: 10px;
+        padding: 8px 12px;
+    }
+    
+    .citation-text {
+        font-size: 0.7rem;
+    }
 }
