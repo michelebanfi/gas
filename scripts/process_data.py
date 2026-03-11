@@ -52,14 +52,19 @@ def fetch_data() -> tuple:
     """Fetch the two CSV files from their URLs."""
     try:
         print("Fetching price data...")
-        # Skip first row which contains extraction date
-        prices_df = pd.read_csv(PRICE_URL, sep=';', encoding='utf-8', skiprows=1)
+        # Try semicolon first, fall back to pipe if needed
+        try:
+            prices_df = pd.read_csv(PRICE_URL, sep=';', encoding='utf-8', skiprows=1)
+        except:
+            prices_df = pd.read_csv(PRICE_URL, sep='|', encoding='utf-8', skiprows=1)
         print(f"Loaded {len(prices_df)} price records")
         print(f"Price columns: {list(prices_df.columns)}")
         
         print("Fetching station data...")
-        # Skip first row which contains extraction date
-        stations_df = pd.read_csv(STATIONS_URL, sep=';', encoding='utf-8', skiprows=1, on_bad_lines='skip')
+        try:
+            stations_df = pd.read_csv(STATIONS_URL, sep=';', encoding='utf-8', skiprows=1, on_bad_lines='skip')
+        except:
+            stations_df = pd.read_csv(STATIONS_URL, sep='|', encoding='utf-8', skiprows=1, on_bad_lines='skip')
         print(f"Loaded {len(stations_df)} station records")
         print(f"Station columns: {list(stations_df.columns)}")
         
