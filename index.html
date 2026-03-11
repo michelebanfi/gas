@@ -12,7 +12,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Custom CSS -->
@@ -46,9 +46,9 @@
                 <!-- Search Radius Slider -->
                 <div class="slider-container">
                     <label for="radius-slider">
-                        Search Radius: <span id="radius-value">10</span> km
+                        Search Radius: <span id="radius-value">2</span> km
                     </label>
-                    <input type="range" id="radius-slider" min="1" max="50" value="10" step="1">
+                    <input type="range" id="radius-slider" min="1" max="50" value="2" step="1">
                 </div>
 
                 <p class="instruction-text">Click on the map to search for nearby stations</p>
@@ -69,22 +69,13 @@
                     </h2>
                     <button id="close-results" class="close-btn">&times;</button>
                 </div>
+                
+                <!-- Price Distribution Panel (temporarily disabled) -->
+                <!-- <div id="price-distribution-panel" class="price-distribution-panel hidden"> -->
+                <!-- </div> -->
+                
                 <div id="results-list" class="results-list">
                     <!-- Dynamically populated by JavaScript -->
-                </div>
-            </div>
-
-            <!-- Price Distribution Panel -->
-            <div id="price-distribution-panel" class="price-distribution-panel hidden">
-                <div class="distribution-header">
-                    <h3>Price Distribution</h3>
-                    <button id="close-distribution" class="close-btn-small">&times;</button>
-                </div>
-                <div id="distribution-content" class="distribution-content">
-                    <canvas id="price-histogram" width="300" height="200"></canvas>
-                    <div id="distribution-stats" class="distribution-stats">
-                        <!-- Stats will be populated by JavaScript -->
-                    </div>
                 </div>
             </div>
 

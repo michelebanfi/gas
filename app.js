@@ -20,6 +20,7 @@ class FuelFinderApp {
         this.uiManager = null;
         this.searchManager = null;
         this.chartManager = null;
+        this.uiClickInProgress = false;
     }
 
     /**
@@ -42,6 +43,15 @@ class FuelFinderApp {
             // Initialize the map
             this.mapManager.initializeMap();
             const map = this.mapManager.getMap();
+            
+            // Wait for map to load before initializing markers
+            await new Promise((resolve) => {
+                if (map.loaded()) {
+                    resolve();
+                } else {
+                    map.on('load', resolve);
+                }
+            });
             
             // Initialize marker and search managers (need map instance)
             this.markerManager = new MarkerManager(map);
@@ -107,6 +117,12 @@ class FuelFinderApp {
      * Handle map click for proximity search
      */
     handleMapClick(e) {
+        // Ignore clicks that originated from UI elements
+        if (uiClickInProgress) {
+            console.log('Click ignored - from UI element');
+            return;
+        }
+        
         // Ignore clicks on fuel markers
         const map = this.mapManager.getMap();
         const features = map.queryRenderedFeatures(e.point, {
@@ -114,7 +130,6 @@ class FuelFinderApp {
         });
         
         if (features.length > 0) {
-            // Clicked on a marker, let the marker click handler deal with it
             return;
         }
         
@@ -176,6 +191,39 @@ class FuelFinderApp {
 
 // Make openDirections available globally for popup buttons
 window.openDirections = openDirections;
+
+// Flag to track UI clicks
+let uiClickInProgress = false;
+
+function isUIClick(e) {
+    const header = document.getElementById('header');
+    const toggleBtn = document.getElementById('toggle-header');
+    const resultsPanel = document.getElementById('results-panel');
+    
+    return header?.contains(e.target) || 
+           toggleBtn?.contains(e.target) ||
+           resultsPanel?.contains(e.target);
+}
+
+document.addEventListener('mousedown', (e) => {
+    if (isUIClick(e)) {
+        uiClickInProgress = true;
+    }
+}, true);
+
+document.addEventListener('mouseup', () => {
+    setTimeout(() => { uiClickInProgress = false; }, 50);
+}, true);
+
+document.addEventListener('touchstart', (e) => {
+    if (isUIClick(e)) {
+        uiClickInProgress = true;
+    }
+}, true);
+
+document.addEventListener('touchend', () => {
+    setTimeout(() => { uiClickInProgress = false; }, 50);
+}, true);
 
 // Initialize application when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {

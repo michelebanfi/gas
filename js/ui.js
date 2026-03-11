@@ -29,12 +29,15 @@ export class UIManager {
         const sortedFuelTypes = allFuelTypes.sort();
         
         sortedFuelTypes.forEach(fuelType => {
-            const chip = document.createElement('div');
+            const chip = document.createElement('button');
             chip.className = 'fuel-chip';
             chip.textContent = fuelType;
             chip.dataset.fuelType = fuelType;
+            chip.type = 'button';
             
-            chip.addEventListener('click', () => {
+            chip.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 this.toggleFuelFilter(fuelType, chip);
                 if (onFilterChange) {
                     onFilterChange(this.selectedFuelTypes);
@@ -43,6 +46,15 @@ export class UIManager {
             
             this.fuelFiltersContainer.appendChild(chip);
         });
+        
+        // Auto-select "Benzina" by default
+        const benzinaChip = this.fuelFiltersContainer.querySelector('[data-fuel-type="Benzina"]');
+        if (benzinaChip) {
+            this.toggleFuelFilter('Benzina', benzinaChip);
+            if (onFilterChange) {
+                onFilterChange(this.selectedFuelTypes);
+            }
+        }
         
         console.log('Fuel filter chips created');
     }
@@ -84,21 +96,44 @@ export class UIManager {
      * Set up event listeners
      */
     setupEventListeners(callbacks) {
+        // Prevent clicks on header from propagating to map
+        this.header.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        this.header.addEventListener('touchend', (e) => {
+            e.stopPropagation();
+        });
+        
         // Radius slider
         this.radiusSlider.addEventListener('input', (e) => {
+            e.stopPropagation();
             this.radiusValue.textContent = e.target.value;
         });
         
+        this.radiusSlider.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        // Slider label
+        const sliderLabel = this.radiusSlider.previousElementSibling;
+        if (sliderLabel) {
+            sliderLabel.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
         // Toggle header collapse
-        this.toggleHeaderBtn.addEventListener('click', () => {
+        this.toggleHeaderBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.header.classList.toggle('collapsed');
             
             // Update icon based on state
             const icon = this.toggleHeaderBtn.querySelector('.toggle-icon');
             if (this.header.classList.contains('collapsed')) {
-                icon.textContent = '🔍';
+                icon.textContent = '\u25BC';
             } else {
-                icon.textContent = '▼';
+                icon.textContent = '\u25B2';
             }
         });
         
@@ -111,12 +146,15 @@ export class UIManager {
             this.toggleResultsPanelState();
         });
         
-        // Close distribution button
-        this.closeDistributionBtn.addEventListener('click', () => {
-            if (callbacks.onCloseDistribution) {
-                callbacks.onCloseDistribution();
-            }
-        });
+        // Close distribution button (check if element exists)
+        if (this.closeDistributionBtn) {
+            this.closeDistributionBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (callbacks.onCloseDistribution) {
+                    callbacks.onCloseDistribution();
+                }
+            });
+        }
         
         // Close results button
         this.closeResultsBtn.addEventListener('click', (e) => {

@@ -83,8 +83,8 @@ export class SearchManager {
                 this.resultsList.appendChild(resultItem);
             });
             
-            // Show price distribution chart
-            this.chartManager.showPriceDistribution(stations);
+            // Price distribution chart disabled temporarily
+            // this.chartManager.showPriceDistribution(stations);
         }
         
         // Show results panel and reset to medium state

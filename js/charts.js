@@ -80,7 +80,7 @@ export class ChartManager {
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        const padding = 30;
+        const padding = 25;
         const chartWidth = canvas.width - 2 * padding;
         const chartHeight = canvas.height - 2 * padding;
         const barWidth = chartWidth / bins.length;
@@ -92,26 +92,28 @@ export class ChartManager {
             const x = padding + i * barWidth;
             const y = canvas.height - padding - barHeight;
             
-            // Create gradient for bars
+            // Create gradient for bars - indigo
             const gradient = ctx.createLinearGradient(x, y, x, canvas.height - padding);
-            gradient.addColorStop(0, '#3B82F6');
-            gradient.addColorStop(1, '#D97706');
+            gradient.addColorStop(0, '#6366f1');
+            gradient.addColorStop(1, '#818cf8');
             
             ctx.fillStyle = gradient;
-            ctx.fillRect(x + 2, y, barWidth - 4, barHeight);
+            ctx.beginPath();
+            ctx.roundRect(x + 2, y, barWidth - 4, barHeight, 3);
+            ctx.fill();
             
             // Add count label on top of bar
             if (count > 0) {
-                ctx.fillStyle = '#E2E8F0';
-                ctx.font = '10px Poppins, sans-serif';
+                ctx.fillStyle = '#64748b';
+                ctx.font = '9px Inter, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(count.toString(), x + barWidth / 2, y - 5);
+                ctx.fillText(count.toString(), x + barWidth / 2, y - 3);
             }
         });
         
         // Draw axes
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(padding, padding);
         ctx.lineTo(padding, canvas.height - padding);
@@ -119,14 +121,12 @@ export class ChartManager {
         ctx.stroke();
         
         // Add labels
-        ctx.fillStyle = '#94A3B8';
-        ctx.font = '9px Poppins, sans-serif';
+        ctx.fillStyle = '#64748b';
+        ctx.font = '8px Inter, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(`€${minPrice.toFixed(3)}`, padding, canvas.height - padding + 15);
+        ctx.fillText(`€${minPrice.toFixed(2)}`, padding, canvas.height - padding + 12);
         ctx.textAlign = 'right';
-        ctx.fillText(`€${maxPrice.toFixed(3)}`, canvas.width - padding, canvas.height - padding + 15);
-        ctx.textAlign = 'center';
-        ctx.fillText('Price Range', canvas.width / 2, canvas.height - 5);
+        ctx.fillText(`€${maxPrice.toFixed(2)}`, canvas.width - padding, canvas.height - padding + 12);
     }
 
     /**
