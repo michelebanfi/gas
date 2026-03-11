@@ -52,18 +52,19 @@ def fetch_data() -> tuple:
     """Fetch the two CSV files from their URLs."""
     try:
         print("Fetching price data...")
-        # Try semicolon first, fall back to pipe if needed
-        try:
-            prices_df = pd.read_csv(PRICE_URL, sep=';', encoding='utf-8', skiprows=1)
-        except:
+        prices_df = pd.read_csv(PRICE_URL, sep=';', encoding='utf-8', skiprows=1)
+        # Check if we got only 1 column (means separator is wrong)
+        if len(prices_df.columns) == 1:
+            print("  Detected pipe separator for prices...")
             prices_df = pd.read_csv(PRICE_URL, sep='|', encoding='utf-8', skiprows=1)
         print(f"Loaded {len(prices_df)} price records")
         print(f"Price columns: {list(prices_df.columns)}")
         
         print("Fetching station data...")
-        try:
-            stations_df = pd.read_csv(STATIONS_URL, sep=';', encoding='utf-8', skiprows=1, on_bad_lines='skip')
-        except:
+        stations_df = pd.read_csv(STATIONS_URL, sep=';', encoding='utf-8', skiprows=1, on_bad_lines='skip')
+        # Check if we got only 1 column (means separator is wrong)
+        if len(stations_df.columns) == 1:
+            print("  Detected pipe separator for stations...")
             stations_df = pd.read_csv(STATIONS_URL, sep='|', encoding='utf-8', skiprows=1, on_bad_lines='skip')
         print(f"Loaded {len(stations_df)} station records")
         print(f"Station columns: {list(stations_df.columns)}")
