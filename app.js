@@ -128,7 +128,7 @@ class FuelFinderApp {
     }
 
     // Ignore clicks on fuel marker chips (HTML markers)
-    if (e.target.closest(".price-chip-marker")) {
+    if (e.originalEvent && e.originalEvent.target.closest(".price-chip-marker")) {
       console.log("Click ignored - on price chip marker");
       return;
     }
